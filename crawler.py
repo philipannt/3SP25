@@ -37,6 +37,6 @@ for bike in bike_elements:
 driver.quit()
 
 df = pd.DataFrame(data, columns=["Thương hiệu", " Model", " Giá", " Link"])
-df.to_csv("honda_motorcycles.csv", index=False, encoding="utf-8-sig")
+df.to_csv("honda.csv", index=False, encoding="utf-8-sig")
 
-print("Dữ liệu đã được lưu vào honda_motorcycles.csv")
+print("Done")
