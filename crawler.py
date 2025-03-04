@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 options = webdriver.ChromeOptions()
-# options.add_argument("--headless")
+options.add_argument("--headless")
 options.add_argument("--ignore-certificate-errors")
 options.add_argument("--allow-running-insecure-content")
 options.add_argument("--disable-blink-features=AutomationControlled")
@@ -34,9 +34,6 @@ for bike in bike_elements:
         price_text = bike.get_attribute("data-price_from")
         price = re.sub(r"[^\d]", "", price_text) if price_text else "N/A"
         url = bike.find_element(By.TAG_NAME, "a").get_attribute("href")
-
-        driver.get(url)
-        
 
         data.append([brand, name, price, url])
 
