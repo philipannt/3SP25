@@ -1,5 +1,0 @@
-DB_USER=avnadmin
-DB_PASS=your_password_here
-DB_HOST=project-ady201m-sp25-philipannt.aivencloud.com
-DB_PORT=22108
-DB_NAME=defaultdb
