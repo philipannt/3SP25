@@ -30,15 +30,6 @@ def scrape_chotot(url, pages):
 
         for link in product_links:
             driver.get(link)
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            
-=======
-
->>>>>>> Stashed changes
-=======
-
->>>>>>> Stashed changes
             soup = BeautifulSoup(driver.page_source, "lxml")
             name = soup.find("title").text.strip()
             
@@ -71,17 +62,11 @@ def scrape_chotot(url, pages):
             }
 
             product_list.append(product)
-<<<<<<< Updated upstream
-=======
             print(name)
         
         df = pd.DataFrame(product_list)
         df.to_json("CHOTOT.json", orient="records", force_ascii=False, indent=4)
         df.to_csv("CHOTOT.csv", index=False, encoding="utf-8-sig")
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         
         driver.quit()
         
