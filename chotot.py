@@ -30,7 +30,11 @@ def scrape_chotot(url, pages):
 
         for link in product_links:
             driver.get(link)
+<<<<<<< Updated upstream
             
+=======
+
+>>>>>>> Stashed changes
             soup = BeautifulSoup(driver.page_source, "lxml")
             name = soup.find("title").text.strip()
             
@@ -63,6 +67,14 @@ def scrape_chotot(url, pages):
             }
 
             product_list.append(product)
+<<<<<<< Updated upstream
+=======
+            print(name)
+        
+        df = pd.DataFrame(product_list)
+        df.to_json("CHOTOT.json", orient="records", force_ascii=False, indent=4)
+        df.to_csv("CHOTOT.csv", index=False, encoding="utf-8-sig")
+>>>>>>> Stashed changes
         
         driver.quit()
         
@@ -71,4 +83,4 @@ def scrape_chotot(url, pages):
     except:
         print("Crawl error.")
 
-scrape_chotot("https://xe.chotot.com/mua-ban-xe-may-da-nang", 9)
+scrape_chotot("https://xe.chotot.com/mua-ban-xe-may-da-nang", 100)

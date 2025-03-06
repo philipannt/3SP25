@@ -171,9 +171,12 @@ def main():
 
         print("Data inserted successfully.")
 
+<<<<<<< Updated upstream
         # data = show_data(cursor)
         # data.to_csv("output.csv", index=False, encoding="utf-8")
 
+=======
+>>>>>>> Stashed changes
     except:
         return "Main error."
 
