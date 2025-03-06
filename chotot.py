@@ -31,7 +31,11 @@ def scrape_chotot(url, pages):
         for link in product_links:
             driver.get(link)
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             
+=======
+
+>>>>>>> Stashed changes
 =======
 
 >>>>>>> Stashed changes
@@ -74,6 +78,9 @@ def scrape_chotot(url, pages):
         df = pd.DataFrame(product_list)
         df.to_json("CHOTOT.json", orient="records", force_ascii=False, indent=4)
         df.to_csv("CHOTOT.csv", index=False, encoding="utf-8-sig")
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         
         driver.quit()
