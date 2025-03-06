@@ -1,12 +1,11 @@
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 from bs4 import BeautifulSoup
+import pandas as pd
 import requests
-import json
-import time
 
 def scrape_chotot(url, pages):
-    # try:
+    try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
         }
@@ -31,7 +30,6 @@ def scrape_chotot(url, pages):
 
         for link in product_links:
             driver.get(link)
-            # time.sleep(5)
             
             soup = BeautifulSoup(driver.page_source, "lxml")
             name = soup.find("title").text.strip()
@@ -65,14 +63,12 @@ def scrape_chotot(url, pages):
             }
 
             product_list.append(product)
-            print(name)
-        
-        with open("CHOTOT.json", "w", encoding="utf-8") as f:
-            json.dump(product_list, f, ensure_ascii=False, indent=4)
         
         driver.quit()
+        
+        return pd.DataFrame(product_list)
 
-    # except:
-    #     print("Crawl error.")
+    except:
+        print("Crawl error.")
 
 scrape_chotot("https://xe.chotot.com/mua-ban-xe-may-da-nang", 9)
