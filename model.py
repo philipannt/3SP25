@@ -12,8 +12,8 @@ from xgboost import XGBRegressor
 
 df = pd.read_csv('D:/Python/BIKE_DETAILS.csv')
 
-X = df.drop(columns=['selling_price'])
-y = df['selling_price']
+X = df.drop(columns=['Price'])
+y = df['Price']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
