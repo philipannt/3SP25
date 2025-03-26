@@ -65,18 +65,81 @@ def scrape_chotot(url, pages):
             }
 
             product_list.append(product)
-            
+
             print(product_links.index(link) + 1)
-        
+
         driver.quit()
         return pd.DataFrame(product_list)
 
     except:
         return "Crawl error."
 
+def scrape_webike(url, pages):
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
+        }
+
+        option = webdriver.ChromeOptions()
+        driver = webdriver.Chrome(options=option)
+
+        links = []
+        products = []
+
+        for x in range(1, pages + 1):
+            url_link = f"{url}?page={x}"
+            r = requests.get(url_link, headers=headers)
+            soup = BeautifulSoup(r.content, "lxml")
+            product_items = soup.find_all("div", class_="list-product")
+
+            for item in product_items:
+                link = item.find('a')['href'] if item.find('a') else None
+                if link:
+                    link = url + link if link.startswith("/") else link
+                    links.append(link)
+
+        for link in links:
+            driver.get(link)
+            soup = BeautifulSoup(driver.page_source, "lxml")
+            name_tag = soup.find("h1", class_="module_title")
+            name = name_tag.text.strip() if name_tag else "Unknown"
+
+            price_tag = soup.find("big", class_="price")
+            price = price_tag.text.strip() if price_tag else "Price not available"
+
+            product_info = {}
+            rows = soup.find_all("tr")
+            for row in rows:
+                label_tag = row.find('label')
+                value_tags = row.find_all('td')
+
+                if label_tag and value_tags:
+                    label = label_tag.get_text(strip=True)
+                    values = [td.get_text(strip=True) for td in value_tags if td.get_text(strip=True)]
+
+                    if len(values) > 1:
+                        key_value_pairs = dict(zip(values[::2], values[1::2]))
+                        product_info.update(key_value_pairs)
+                    else:
+                        product_info[label] = values[0] if values else "-"
+
+            products.append({
+                "name": name,
+                "info": product_info,
+                "price": price
+            })
+            
+            print(links.index(link) + 1)
+
+        driver.quit()
+        return pd.DataFrame(products)
+    
+    except:
+        return "Scrape error"
+
 def connect_cloud():
     load_dotenv()
-    
+
     config = {
         "host": os.getenv("AIVEN_DB_HOST"),
         "port": int(os.getenv("AIVEN_DB_PORT")),
@@ -101,7 +164,7 @@ def create_database(cursor):
     except:
         return "Create database error."
 
-def create_table(cursor):
+def create_table_chotot(cursor):
     try:
         create_table_query = '''
         CREATE TABLE IF NOT EXISTS tbl_Xemaychotot(
@@ -122,7 +185,39 @@ def create_table(cursor):
     except:
         return "Create table error."
 
-def insert_data(cursor, df):
+def create_table_webike(cursor):
+    try:
+        create_table_query = '''
+        CREATE TABLE IF NOT EXISTS tbl_XemayWebike(
+            ID INT AUTO_INCREMENT PRIMARY KEY,
+            Name_Bike VARCHAR(255) NOT NULL,
+            Price VARCHAR(50) NOT NULL CHECK,
+            Engine VARCHAR(100) DEFAULT 'N/A',
+            Starting_System VARCHAR(100) DEFAULT 'N/A',
+            Compression_Ratio VARCHAR(50) DEFAULT 'N/A',
+            Cooling_System VARCHAR(100) DEFAULT 'N/A',
+            Engine_Displacement VARCHAR(100) DEFAULT 'N/A',
+            Transmission VARCHAR(100) DEFAULT 'N/A',
+            Bore_Stroke VARCHAR(100) DEFAULT 'N/A',
+            Max_Power VARCHAR(100) DEFAULT 'N/A',
+            Max_Torque VARCHAR(100) DEFAULT 'N/A',
+            Dimensions VARCHAR(100) DEFAULT 'N/A',
+            Wheelbase VARCHAR(100) DEFAULT 'N/A',
+            Seat_Height VARCHAR(100) DEFAULT 'N/A',
+            Ground_Clearance VARCHAR(100) DEFAULT 'N/A',
+            Fuel_Capacity VARCHAR(100) DEFAULT 'N/A',
+            Weight VARCHAR(100) DEFAULT 'N/A',
+            Brake VARCHAR(100) DEFAULT 'N/A',
+            Front_Tire_Size VARCHAR(100) DEFAULT 'N/A',
+            Rear_Tire_Size VARCHAR(100) DEFAULT 'N/A'
+        );
+        '''
+        cursor.execute(create_table_query)
+
+    except:
+        return "Create table error."
+
+def insert_data_chotot(cursor, df):
     try:
         insert_query = '''
         INSERT INTO tbl_Xemaychotot (
@@ -136,9 +231,40 @@ def insert_data(cursor, df):
             Price_max
         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         '''
-
         cursor.executemany(insert_query, df.to_records(index=False))
 
+    except:
+        return "Insert error"
+
+def insert_data_webike(cursor, df):
+    try:
+        insert_query = '''
+        INSERT INTO tbl_XemayWebike (
+            Name_Bike, 
+            Price, 
+            Engine, 
+            Starting_System, 
+            Compression_Ratio, 
+            Cooling_System, 
+            Engine_Displacement, 
+            Transmission,
+            Bore_Stroke, 
+            Max_Power, 
+            Max_Torque, 
+            Dimensions, 
+            Wheelbase,
+            Seat_Height, 
+            Ground_Clearance, 
+            Fuel_Capacity,
+            Weight, 
+            Brake, 
+            Front_Tire_Size, 
+            Rear_Tire_Size
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+
+        cursor.executemany(insert_query, df.to_records(index=False))
+    
     except:
         return "Insert error"
 
@@ -157,22 +283,23 @@ def main():
         conn = connect_cloud()
         cursor = conn.cursor()
 
-        create_database(cursor)
+        # create_database(cursor)
         conn.database = "PROJ_ADY"
 
-        create_table(cursor)
-        conn.commit()
-        print("Done.")
-        
-        df = scrape_chotot("https://xe.chotot.com/mua-ban-xe-may-da-nang", 9)
-        insert_data(cursor, df)
-        conn.commit()
-        print("Done.")
+        # create_table_chotot(cursor)
+        # conn.commit()
+        # print("Done.")
 
-        print("Data inserted successfully.")
+        # df = scrape_chotot("https://xe.chotot.com/mua-ban-xe-may-da-nang", 9)
 
-        # data = show_data(cursor)
-        # data.to_csv("output.csv", index=False, encoding="utf-8")
+        # insert_data_chotot(cursor, df)
+        # conn.commit()
+        # print("Done.")
+
+        # print("Data inserted successfully.")
+
+        data = show_data(cursor)
+        data.to_csv("output.csv", index=False, encoding="utf-8")
 
     except:
         return "Main error."
