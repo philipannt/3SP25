@@ -26,10 +26,4 @@ from warnings import simplefilter
 simplefilter("ignore")
 
 data = pd.read_json('E:/Python/3SP25/CHOTOT.json')
-
-print(f'There are {data.isna().sum().sum()} null values in the dataset.')
-print(f'There are {data.duplicated().sum()} duplicate entries in the dataset.')
-
 data.drop_duplicates(inplace=True)
-
-print(f'There are {data.duplicated().sum()} duplicate entries in the dataset.')
